@@ -1,0 +1,830 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Java Collections Guide</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0a0a0f;
+  --surface: #111118;
+  --surface2: #18181f;
+  --border: rgba(255,255,255,0.07);
+  --border-hover: rgba(255,255,255,0.15);
+  --text: #f0f0f5;
+  --muted: #7a7a8a;
+  --hint: #44445a;
+  --accent: #7c6af7;
+  --accent2: #3ecfb2;
+  --accent3: #f76a6a;
+  --accent4: #f7c86a;
+  --mono: 'Space Mono', monospace;
+  --sans: 'Syne', sans-serif;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--sans);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* ── grid noise bg ── */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(124,106,247,0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(124,106,247,0.03) 1px, transparent 1px);
+  background-size: 40px 40px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.container {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 3rem 2rem 4rem;
+  position: relative;
+  z-index: 1;
+}
+
+/* ── header ── */
+.header {
+  margin-bottom: 3rem;
+  opacity: 0;
+  transform: translateY(20px);
+  animation: fadeUp 0.6s ease forwards;
+}
+
+.header-label {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.2em;
+  color: var(--accent);
+  text-transform: uppercase;
+  margin-bottom: 0.75rem;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.header-label::before {
+  content: '';
+  display: inline-block;
+  width: 24px;
+  height: 1px;
+  background: var(--accent);
+}
+
+h1 {
+  font-size: clamp(2rem, 5vw, 3.5rem);
+  font-weight: 800;
+  line-height: 1.05;
+  letter-spacing: -0.03em;
+  color: var(--text);
+  margin-bottom: 1rem;
+}
+
+h1 span {
+  color: var(--accent);
+}
+
+.header-sub {
+  font-size: 15px;
+  color: var(--muted);
+  font-weight: 400;
+  max-width: 480px;
+  line-height: 1.7;
+}
+
+/* ── complexity legend ── */
+.legend {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 2rem;
+  opacity: 0;
+  animation: fadeUp 0.6s ease 0.15s forwards;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--muted);
+}
+
+.legend-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.dot-o1 { background: #3ecfb2; }
+.dot-on { background: #f7c86a; }
+.dot-ologn { background: #7c6af7; }
+
+/* ── tabs ── */
+.tabs {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-bottom: 1.5rem;
+  opacity: 0;
+  animation: fadeUp 0.6s ease 0.2s forwards;
+}
+
+.tab {
+  padding: 8px 16px;
+  border-radius: 40px;
+  border: 1px solid var(--border);
+  font-size: 13px;
+  font-family: var(--sans);
+  font-weight: 600;
+  cursor: pointer;
+  background: var(--surface);
+  color: var(--muted);
+  transition: all 0.2s ease;
+  letter-spacing: 0.01em;
+}
+
+.tab:hover {
+  border-color: var(--border-hover);
+  color: var(--text);
+  background: var(--surface2);
+}
+
+.tab.active {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+
+/* ── panel ── */
+.panel { display: none; }
+.panel.active {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  animation: panelIn 0.3s ease;
+}
+
+@keyframes panelIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ── cards ── */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 1.5rem;
+  transition: border-color 0.2s, transform 0.2s;
+}
+
+.card:hover {
+  border-color: var(--border-hover);
+  transform: translateY(-2px);
+}
+
+.card.full { grid-column: 1 / -1; }
+.card.hero {
+  grid-column: 1 / -1;
+  background: linear-gradient(135deg, #13131e 0%, #1a1428 100%);
+  border-color: rgba(124,106,247,0.2);
+  padding: 2rem;
+}
+
+.card-label {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--hint);
+  margin-bottom: 8px;
+}
+
+.class-name {
+  font-family: var(--mono);
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--accent);
+  margin-bottom: 6px;
+  word-break: break-all;
+}
+
+.desc {
+  font-size: 14px;
+  color: var(--muted);
+  line-height: 1.65;
+}
+
+/* ── badges ── */
+.badges { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 1rem; }
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-family: var(--sans);
+}
+
+.badge-use {
+  background: rgba(62,207,178,0.12);
+  color: var(--accent2);
+  border: 1px solid rgba(62,207,178,0.2);
+}
+
+.badge-avoid {
+  background: rgba(247,106,106,0.1);
+  color: var(--accent3);
+  border: 1px solid rgba(247,106,106,0.2);
+}
+
+/* ── code block ── */
+.code-wrap { position: relative; }
+
+.code-block {
+  background: #0d0d14;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 1rem 1.25rem;
+  font-family: var(--mono);
+  font-size: 12px;
+  color: #c8c8e0;
+  line-height: 1.8;
+  overflow-x: auto;
+  white-space: pre;
+}
+
+.copy-btn {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--muted);
+  font-family: var(--mono);
+  font-size: 10px;
+  padding: 3px 8px;
+  cursor: pointer;
+  transition: all 0.15s;
+  letter-spacing: 0.05em;
+}
+
+.copy-btn:hover { color: var(--text); border-color: var(--border-hover); }
+.copy-btn.copied { color: var(--accent2); border-color: rgba(62,207,178,0.3); }
+
+/* ── ops grid ── */
+.ops-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+}
+
+.op {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px 12px;
+  cursor: default;
+  transition: border-color 0.15s, background 0.15s;
+}
+
+.op:hover {
+  border-color: rgba(124,106,247,0.3);
+  background: rgba(124,106,247,0.05);
+}
+
+.op-name {
+  font-family: var(--mono);
+  font-size: 11.5px;
+  color: var(--accent);
+  margin-bottom: 3px;
+}
+
+.op-desc {
+  font-size: 11px;
+  color: var(--muted);
+  line-height: 1.4;
+}
+
+/* ── complexity chips ── */
+.complexity-row { display: flex; gap: 6px; flex-wrap: wrap; }
+
+.chip {
+  font-family: var(--mono);
+  font-size: 11px;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-weight: 700;
+}
+
+.chip-o1  { background: rgba(62,207,178,0.12); color: var(--accent2); border: 1px solid rgba(62,207,178,0.25); }
+.chip-on  { background: rgba(247,200,106,0.12); color: var(--accent4); border: 1px solid rgba(247,200,106,0.25); }
+.chip-ologn { background: rgba(124,106,247,0.12); color: var(--accent); border: 1px solid rgba(124,106,247,0.25); }
+
+/* ── section label ── */
+.slabel {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--hint);
+  margin: 1rem 0 0.5rem;
+}
+
+.slabel:first-child { margin-top: 0; }
+
+/* ── divider ── */
+hr {
+  border: none;
+  border-top: 1px solid var(--border);
+  margin: 1rem 0;
+}
+
+/* ── quick pick bar ── */
+.quickpick {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+  opacity: 0;
+  animation: fadeUp 0.6s ease 0.3s forwards;
+}
+
+.quickpick-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--muted);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  font-family: var(--mono);
+  margin-bottom: 1rem;
+}
+
+.qp-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 8px;
+}
+
+.qp-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.qp-item:hover {
+  border-color: rgba(124,106,247,0.35);
+  background: rgba(124,106,247,0.06);
+}
+
+.qp-arrow {
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--hint);
+}
+
+.qp-need { font-size: 12px; color: var(--muted); flex: 1; }
+.qp-class { font-family: var(--mono); font-size: 12px; color: var(--accent); font-weight: 700; }
+
+/* ── search ── */
+.search-wrap {
+  position: relative;
+  margin-bottom: 1.5rem;
+  opacity: 0;
+  animation: fadeUp 0.6s ease 0.25s forwards;
+}
+
+.search-icon {
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--hint);
+  font-size: 14px;
+}
+
+.search-input {
+  width: 100%;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 12px 14px 12px 38px;
+  font-family: var(--mono);
+  font-size: 13px;
+  color: var(--text);
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.search-input::placeholder { color: var(--hint); }
+.search-input:focus { border-color: rgba(124,106,247,0.4); }
+
+.search-results {
+  display: none;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 1rem;
+}
+
+.search-results.visible { display: flex; }
+
+.sr-item {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 12px 16px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.sr-item:hover { border-color: rgba(124,106,247,0.3); }
+
+.sr-cls { font-family: var(--mono); font-size: 12px; color: var(--accent); font-weight: 700; }
+.sr-match { font-size: 12px; color: var(--muted); margin-top: 2px; }
+.sr-match mark { background: rgba(124,106,247,0.25); color: var(--accent); border-radius: 2px; }
+
+/* ── animations ── */
+@keyframes fadeUp {
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ── scrollbar ── */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border-hover); border-radius: 3px; }
+
+/* ── syntax highlight helpers ── */
+.kw  { color: #b989f5; }
+.tp  { color: #3ecfb2; }
+.cm  { color: #4a4a6a; font-style: italic; }
+.str { color: #f7c86a; }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <header class="header">
+    <div class="header-label">DSA Reference</div>
+    <h1>Java <span>Collections</span><br>Field Guide</h1>
+    <p class="header-sub">Every data structure you need for DSA and interviews — when to use it, how to init it, every key operation.</p>
+  </header>
+
+  <!-- search -->
+  <div class="search-wrap">
+    <span class="search-icon">⌕</span>
+    <input class="search-input" id="searchInput" type="text" placeholder="search methods, use cases... e.g. 'floor', 'frequency count'" autocomplete="off" spellcheck="false">
+    <div class="search-results" id="searchResults"></div>
+  </div>
+
+  <!-- quick pick -->
+  <div class="quickpick">
+    <div class="quickpick-title">// quick pick</div>
+    <div class="qp-grid" id="qpGrid"></div>
+  </div>
+
+  <!-- legend -->
+  <div class="legend">
+    <div class="legend-item"><div class="legend-dot dot-o1"></div>O(1) constant</div>
+    <div class="legend-item"><div class="legend-dot dot-ologn"></div>O(log n) logarithmic</div>
+    <div class="legend-item"><div class="legend-dot dot-on"></div>O(n) linear</div>
+  </div>
+
+  <!-- tabs -->
+  <div class="tabs" id="tabs"></div>
+
+  <!-- panels -->
+  <div id="panels"></div>
+
+</div>
+
+<script>
+const data = [
+  {
+    id:"arraylist", label:"ArrayList", shortLabel:"List",
+    cls:"ArrayList<T>",
+    desc:"Resizable array. O(1) random access by index. Shifting required on insert/delete in the middle.",
+    when:"Need a list, index-based access, mostly appending to end",
+    avoid:"Frequent insert/delete in the middle",
+    quickNeed:"Need a plain list",
+    init:`<span class="kw">List</span>&lt;<span class="tp">Integer</span>&gt; list = <span class="kw">new</span> ArrayList&lt;&gt;();
+<span class="kw">List</span>&lt;<span class="tp">String</span>&gt; list = <span class="kw">new</span> ArrayList&lt;&gt;(Arrays.asList(<span class="str">"a"</span>, <span class="str">"b"</span>));`,
+    ops:[
+      {name:"list.add(x)",desc:"Append to end — O(1)"},
+      {name:"list.add(i, x)",desc:"Insert at index — O(n)"},
+      {name:"list.get(i)",desc:"Access by index — O(1)"},
+      {name:"list.set(i, x)",desc:"Replace at index — O(1)"},
+      {name:"list.remove(i)",desc:"Remove at index — O(n)"},
+      {name:"list.size()",desc:"Element count — O(1)"},
+      {name:"list.contains(x)",desc:"Membership check — O(n)"},
+      {name:"Collections.sort(list)",desc:"Sort in place — O(n log n)"},
+    ],
+    complexities:[{l:"get(i) O(1)",c:"o1"},{l:"add(end) O(1)",c:"o1"},{l:"add(mid) O(n)",c:"on"},{l:"remove O(n)",c:"on"}]
+  },
+  {
+    id:"linkedlist", label:"LinkedList", shortLabel:"LinkedList",
+    cls:"LinkedList<T>",
+    desc:"Doubly linked list. O(1) insert/delete at both ends. No index-based O(1) access.",
+    when:"Frequent add/remove at both ends, or using as Queue/Deque",
+    avoid:"Random access by index — use ArrayList instead",
+    quickNeed:"Add/remove at both ends",
+    init:`<span class="kw">LinkedList</span>&lt;<span class="tp">Integer</span>&gt; ll = <span class="kw">new</span> LinkedList&lt;&gt;();
+<span class="kw">Deque</span>&lt;<span class="tp">Integer</span>&gt; dq = <span class="kw">new</span> LinkedList&lt;&gt;();`,
+    ops:[
+      {name:"ll.addFirst(x)",desc:"Prepend — O(1)"},
+      {name:"ll.addLast(x)",desc:"Append — O(1)"},
+      {name:"ll.removeFirst()",desc:"Remove head — O(1)"},
+      {name:"ll.removeLast()",desc:"Remove tail — O(1)"},
+      {name:"ll.peekFirst()",desc:"View head, no remove — O(1)"},
+      {name:"ll.peekLast()",desc:"View tail, no remove — O(1)"},
+      {name:"ll.get(i)",desc:"Index access — O(n)"},
+      {name:"ll.size()",desc:"Element count — O(1)"},
+    ],
+    complexities:[{l:"addFirst/Last O(1)",c:"o1"},{l:"removeFirst/Last O(1)",c:"o1"},{l:"get(i) O(n)",c:"on"}]
+  },
+  {
+    id:"hashmap", label:"HashMap", shortLabel:"HashMap",
+    cls:"HashMap<K, V>",
+    desc:"Hash table. O(1) put/get/remove. No guaranteed order. Allows one null key.",
+    when:"Fast key lookup, frequency counting, grouping elements",
+    avoid:"Need sorted keys or preserved insertion order — use TreeMap/LinkedHashMap",
+    quickNeed:"Fast lookup by key",
+    init:`<span class="kw">Map</span>&lt;<span class="tp">String</span>, <span class="tp">Integer</span>&gt; map = <span class="kw">new</span> HashMap&lt;&gt;();
+<span class="kw">Map</span>&lt;<span class="tp">String</span>, <span class="tp">Integer</span>&gt; map = <span class="kw">new</span> HashMap&lt;&gt;(Map.of(<span class="str">"a"</span>,1,<span class="str">"b"</span>,2));`,
+    ops:[
+      {name:"map.put(k, v)",desc:"Insert / update — O(1)"},
+      {name:"map.get(k)",desc:"Get value — O(1)"},
+      {name:"map.getOrDefault(k,d)",desc:"Get or fallback default"},
+      {name:"map.containsKey(k)",desc:"Key exists? — O(1)"},
+      {name:"map.remove(k)",desc:"Delete key — O(1)"},
+      {name:"map.keySet()",desc:"Set of all keys"},
+      {name:"map.values()",desc:"Collection of values"},
+      {name:"map.entrySet()",desc:"Iterate key+value pairs"},
+    ],
+    complexities:[{l:"put O(1)",c:"o1"},{l:"get O(1)",c:"o1"},{l:"remove O(1)",c:"o1"}],
+    extra:`<span class="cm">// Iterate entries</span>
+<span class="kw">for</span> (Map.Entry&lt;<span class="tp">String</span>,<span class="tp">Integer</span>&gt; e : map.entrySet()) {
+    System.out.println(e.getKey() + <span class="str">" → "</span> + e.getValue());
+}
+<span class="cm">// Frequency count pattern</span>
+map.put(c, map.getOrDefault(c, 0) + 1);`
+  },
+  {
+    id:"treemap", label:"TreeMap", shortLabel:"TreeMap",
+    cls:"TreeMap<K, V>",
+    desc:"Red-Black tree backed map. Keys always sorted. O(log n) for all operations.",
+    when:"Sorted keys required, range queries, need floor/ceiling of a key",
+    avoid:"Order doesn't matter — use HashMap (O(1) is faster)",
+    quickNeed:"Sorted keys / range queries",
+    init:`<span class="kw">TreeMap</span>&lt;<span class="tp">String</span>, <span class="tp">Integer</span>&gt; tm = <span class="kw">new</span> TreeMap&lt;&gt;();
+<span class="kw">TreeMap</span>&lt;<span class="tp">Integer</span>, <span class="tp">String</span>&gt; tm = <span class="kw">new</span> TreeMap&lt;&gt;(Comparator.reverseOrder());`,
+    ops:[
+      {name:"tm.put(k, v)",desc:"Insert — O(log n)"},
+      {name:"tm.get(k)",desc:"Get value — O(log n)"},
+      {name:"tm.firstKey()",desc:"Smallest key — O(log n)"},
+      {name:"tm.lastKey()",desc:"Largest key — O(log n)"},
+      {name:"tm.floorKey(k)",desc:"Largest key ≤ k"},
+      {name:"tm.ceilingKey(k)",desc:"Smallest key ≥ k"},
+      {name:"tm.headMap(k)",desc:"All keys strictly < k"},
+      {name:"tm.tailMap(k)",desc:"All keys ≥ k"},
+    ],
+    complexities:[{l:"put O(log n)",c:"ologn"},{l:"get O(log n)",c:"ologn"},{l:"floor/ceil O(log n)",c:"ologn"}]
+  },
+  {
+    id:"hashset", label:"HashSet", shortLabel:"HashSet",
+    cls:"HashSet<T>",
+    desc:"Unordered unique elements via hash table. O(1) add/contains/remove. No duplicates.",
+    when:"Fast membership check, deduplication, sliding window character tracking",
+    avoid:"Need sorted elements — use TreeSet",
+    quickNeed:"Unique elements, fast lookup",
+    init:`<span class="kw">Set</span>&lt;<span class="tp">Integer</span>&gt; set = <span class="kw">new</span> HashSet&lt;&gt;();
+<span class="kw">Set</span>&lt;<span class="tp">String</span>&gt; set = <span class="kw">new</span> HashSet&lt;&gt;(Arrays.asList(<span class="str">"a"</span>,<span class="str">"b"</span>,<span class="str">"c"</span>));`,
+    ops:[
+      {name:"set.add(x)",desc:"Insert element — O(1)"},
+      {name:"set.contains(x)",desc:"Membership check — O(1)"},
+      {name:"set.remove(x)",desc:"Delete element — O(1)"},
+      {name:"set.size()",desc:"Element count — O(1)"},
+      {name:"set.isEmpty()",desc:"Is the set empty?"},
+      {name:"set.addAll(col)",desc:"Union with collection"},
+      {name:"set.retainAll(col)",desc:"Intersection in place"},
+      {name:"set.removeAll(col)",desc:"Set difference in place"},
+    ],
+    complexities:[{l:"add O(1)",c:"o1"},{l:"contains O(1)",c:"o1"},{l:"remove O(1)",c:"o1"}]
+  },
+  {
+    id:"treeset", label:"TreeSet", shortLabel:"TreeSet",
+    cls:"TreeSet<T>",
+    desc:"Sorted unique elements. Red-Black tree. O(log n) operations. floor/ceiling support.",
+    when:"Sorted unique elements, find nearest value, sliding window min/max",
+    avoid:"Order doesn't matter — HashSet is faster",
+    quickNeed:"Sorted unique / nearest value",
+    init:`<span class="kw">TreeSet</span>&lt;<span class="tp">Integer</span>&gt; ts = <span class="kw">new</span> TreeSet&lt;&gt;();
+<span class="kw">TreeSet</span>&lt;<span class="tp">Integer</span>&gt; ts = <span class="kw">new</span> TreeSet&lt;&gt;(Comparator.reverseOrder());`,
+    ops:[
+      {name:"ts.add(x)",desc:"Insert — O(log n)"},
+      {name:"ts.contains(x)",desc:"Check — O(log n)"},
+      {name:"ts.first()",desc:"Smallest element — O(log n)"},
+      {name:"ts.last()",desc:"Largest element — O(log n)"},
+      {name:"ts.floor(x)",desc:"Largest element ≤ x"},
+      {name:"ts.ceiling(x)",desc:"Smallest element ≥ x"},
+      {name:"ts.headSet(x)",desc:"All elements < x"},
+      {name:"ts.pollFirst()",desc:"Remove & return smallest"},
+    ],
+    complexities:[{l:"add O(log n)",c:"ologn"},{l:"floor/ceil O(log n)",c:"ologn"},{l:"first/last O(log n)",c:"ologn"}]
+  },
+  {
+    id:"pq", label:"PriorityQueue", shortLabel:"PQueue",
+    cls:"PriorityQueue<T>",
+    desc:"Min-heap by default. Always retrieves the smallest element in O(log n). Custom comparators for max-heap.",
+    when:"Always need min or max element, Dijkstra's algo, Top-K problems",
+    avoid:"Arbitrary element access — PQ only guarantees the root",
+    quickNeed:"Always get min (or max)",
+    init:`<span class="kw">PriorityQueue</span>&lt;<span class="tp">Integer</span>&gt; minPQ = <span class="kw">new</span> PriorityQueue&lt;&gt;();
+<span class="kw">PriorityQueue</span>&lt;<span class="tp">Integer</span>&gt; maxPQ = <span class="kw">new</span> PriorityQueue&lt;&gt;(Comparator.reverseOrder());
+<span class="cm">// Custom (e.g. sort by first element of pair)</span>
+<span class="kw">PriorityQueue</span>&lt;<span class="kw">int</span>[]&gt; pq = <span class="kw">new</span> PriorityQueue&lt;&gt;((a,b) -&gt; a[0]-b[0]);`,
+    ops:[
+      {name:"pq.offer(x)",desc:"Insert — O(log n)"},
+      {name:"pq.poll()",desc:"Remove & return min — O(log n)"},
+      {name:"pq.peek()",desc:"View min, no remove — O(1)"},
+      {name:"pq.size()",desc:"Element count — O(1)"},
+      {name:"pq.isEmpty()",desc:"Is heap empty?"},
+      {name:"pq.contains(x)",desc:"Search — O(n) (slow!)"},
+    ],
+    complexities:[{l:"offer O(log n)",c:"ologn"},{l:"poll O(log n)",c:"ologn"},{l:"peek O(1)",c:"o1"}]
+  },
+  {
+    id:"deque", label:"Stack / Queue", shortLabel:"Deque",
+    cls:"ArrayDeque<T>",
+    desc:"Double-ended queue. Use as a Stack (LIFO) or Queue (FIFO). Faster than the legacy Stack class.",
+    when:"Bracket matching, DFS (stack), BFS (queue), monotonic window problems",
+    avoid:"Using the old java.util.Stack class — ArrayDeque is always faster",
+    quickNeed:"Stack (LIFO) or Queue (FIFO)",
+    init:`<span class="kw">Deque</span>&lt;<span class="tp">Integer</span>&gt; stack = <span class="kw">new</span> ArrayDeque&lt;&gt;(); <span class="cm">// LIFO</span>
+<span class="kw">Queue</span>&lt;<span class="tp">Integer</span>&gt; queue = <span class="kw">new</span> ArrayDeque&lt;&gt;(); <span class="cm">// FIFO</span>`,
+    ops:[
+      {name:"stack.push(x)",desc:"Push to top — O(1)"},
+      {name:"stack.pop()",desc:"Pop from top — O(1)"},
+      {name:"stack.peek()",desc:"View top — O(1)"},
+      {name:"queue.offer(x)",desc:"Enqueue to back — O(1)"},
+      {name:"queue.poll()",desc:"Dequeue from front — O(1)"},
+      {name:"queue.peek()",desc:"View front — O(1)"},
+      {name:".isEmpty()",desc:"Is it empty? — O(1)"},
+      {name:".size()",desc:"Element count — O(1)"},
+    ],
+    complexities:[{l:"push/pop O(1)",c:"o1"},{l:"offer/poll O(1)",c:"o1"},{l:"peek O(1)",c:"o1"}]
+  },
+];
+
+const chipClass = { o1:"chip-o1", on:"chip-on", ologn:"chip-ologn" };
+
+// Build quick pick
+const qpGrid = document.getElementById("qpGrid");
+data.forEach(d => {
+  const el = document.createElement("div");
+  el.className = "qp-item";
+  el.innerHTML = `<span class="qp-need">${d.quickNeed}</span><span class="qp-arrow">→</span><span class="qp-class">${d.shortLabel}</span>`;
+  el.onclick = () => activateTab(d.id);
+  qpGrid.appendChild(el);
+});
+
+// Build tabs
+const tabsEl = document.getElementById("tabs");
+const panelsEl = document.getElementById("panels");
+
+function activateTab(id) {
+  document.querySelectorAll(".tab").forEach(t => t.classList.toggle("active", t.dataset.id === id));
+  document.querySelectorAll(".panel").forEach(p => p.classList.toggle("active", p.id === "panel-"+id));
+  document.getElementById("panel-"+id)?.scrollIntoView({behavior:"smooth", block:"nearest"});
+}
+
+data.forEach((d, i) => {
+  const tab = document.createElement("button");
+  tab.className = "tab" + (i===0?" active":"");
+  tab.dataset.id = d.id;
+  tab.textContent = d.label;
+  tab.onclick = () => activateTab(d.id);
+  tabsEl.appendChild(tab);
+
+  const panel = document.createElement("div");
+  panel.className = "panel" + (i===0?" active":"");
+  panel.id = "panel-"+d.id;
+
+  const extraHTML = d.extra ? `
+    <div class="card full">
+      <div class="card-label">Common pattern</div>
+      <div class="code-wrap">
+        <div class="code-block">${d.extra}</div>
+        <button class="copy-btn" onclick="copyCode(this)">copy</button>
+      </div>
+    </div>` : "";
+
+  panel.innerHTML = `
+    <div class="card hero">
+      <div class="card-label">class</div>
+      <div class="class-name">${d.cls}</div>
+      <div class="desc">${d.desc}</div>
+      <div class="badges">
+        <span class="badge badge-use">✓ ${d.when}</span>
+        <span class="badge badge-avoid">✕ ${d.avoid}</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-label">Initialise</div>
+      <div class="code-wrap">
+        <div class="code-block">${d.init}</div>
+        <button class="copy-btn" onclick="copyCode(this)">copy</button>
+      </div>
+      <div class="slabel" style="margin-top:1rem">Complexity</div>
+      <div class="complexity-row">
+        ${d.complexities.map(c=>`<span class="chip ${chipClass[c.c]}">${c.l}</span>`).join("")}
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-label">Key operations</div>
+      <div class="ops-grid">
+        ${d.ops.map(op=>`<div class="op"><div class="op-name">${op.name}</div><div class="op-desc">${op.desc}</div></div>`).join("")}
+      </div>
+    </div>
+    ${extraHTML}
+  `;
+  panelsEl.appendChild(panel);
+});
+
+// Copy button
+function copyCode(btn) {
+  const text = btn.previousElementSibling.innerText;
+  navigator.clipboard.writeText(text).then(() => {
+    btn.textContent = "✓ done";
+    btn.classList.add("copied");
+    setTimeout(() => { btn.textContent = "copy"; btn.classList.remove("copied"); }, 1500);
+  });
+}
+
+// Search
+const searchInput = document.getElementById("searchInput");
+const searchResults = document.getElementById("searchResults");
+
+function stripHTML(s) { const d = document.createElement("div"); d.innerHTML = s; return d.textContent; }
+
+searchInput.addEventListener("input", () => {
+  const q = searchInput.value.trim().toLowerCase();
+  if (!q) { searchResults.classList.remove("visible"); return; }
+
+  const hits = [];
+  data.forEach(d => {
+    const fields = [
+      { text: d.cls, label: "class" },
+      { text: d.desc, label: "description" },
+      { text: d.when, label: "use when" },
+      { text: d.avoid, label: "avoid when" },
+      ...d.ops.map(op => ({ text: op.name + " " + op.desc, label: op.name })),
+    ];
+    fields.forEach(f => {
+      if (f.text.toLowerCase().includes(q)) {
+        const hi = f.text.replace(new RegExp(`(${q})`, "gi"), "<mark>$1</mark>");
+        hits.push({ id: d.id, cls: d.label, matchLabel: f.label, matchText: hi });
+      }
+    });
+  });
+
+  searchResults.innerHTML = hits.slice(0,6).map(h => `
+    <div class="sr-item" onclick="activateTab('${h.id}'); searchInput.value=''; searchResults.classList.remove('visible')">
+      <div class="sr-cls">${h.cls}</div>
+      <div class="sr-match"><em>${h.matchLabel}:</em> ${h.matchText}</div>
+    </div>`).join("") || `<div class="sr-item"><div class="sr-match">No results for "<strong>${q}</strong>"</div></div>`;
+
+  searchResults.classList.add("visible");
+});
+
+document.addEventListener("click", e => {
+  if (!e.target.closest(".search-wrap")) searchResults.classList.remove("visible");
+});
+</script>
+</body>
+</html>
