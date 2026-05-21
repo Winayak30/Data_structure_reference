@@ -33,7 +33,6 @@ body {
   overflow-x: hidden;
 }
 
-/* ── grid noise bg ── */
 body::before {
   content: '';
   position: fixed;
@@ -54,7 +53,6 @@ body::before {
   z-index: 1;
 }
 
-/* ── header ── */
 .header {
   margin-bottom: 3rem;
   opacity: 0;
@@ -103,7 +101,6 @@ h1 span {
   line-height: 1.7;
 }
 
-/* ── complexity legend ── */
 .legend {
   display: flex;
   gap: 16px;
@@ -132,7 +129,6 @@ h1 span {
 .dot-on { background: #f7c86a; }
 .dot-ologn { background: #7c6af7; }
 
-/* ── tabs ── */
 .tabs {
   display: flex;
   gap: 6px;
@@ -168,7 +164,6 @@ h1 span {
   color: #fff;
 }
 
-/* ── panel ── */
 .panel { display: none; }
 .panel.active {
   display: grid;
@@ -182,7 +177,6 @@ h1 span {
   to   { opacity: 1; transform: translateY(0); }
 }
 
-/* ── cards ── */
 .card {
   background: var(--surface);
   border: 1px solid var(--border);
@@ -228,7 +222,6 @@ h1 span {
   line-height: 1.65;
 }
 
-/* ── badges ── */
 .badges { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 1rem; }
 
 .badge {
@@ -254,7 +247,6 @@ h1 span {
   border: 1px solid rgba(247,106,106,0.2);
 }
 
-/* ── code block ── */
 .code-wrap { position: relative; }
 
 .code-block {
@@ -289,7 +281,6 @@ h1 span {
 .copy-btn:hover { color: var(--text); border-color: var(--border-hover); }
 .copy-btn.copied { color: var(--accent2); border-color: rgba(62,207,178,0.3); }
 
-/* ── ops grid ── */
 .ops-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -323,7 +314,6 @@ h1 span {
   line-height: 1.4;
 }
 
-/* ── complexity chips ── */
 .complexity-row { display: flex; gap: 6px; flex-wrap: wrap; }
 
 .chip {
@@ -338,7 +328,6 @@ h1 span {
 .chip-on  { background: rgba(247,200,106,0.12); color: var(--accent4); border: 1px solid rgba(247,200,106,0.25); }
 .chip-ologn { background: rgba(124,106,247,0.12); color: var(--accent); border: 1px solid rgba(124,106,247,0.25); }
 
-/* ── section label ── */
 .slabel {
   font-family: var(--mono);
   font-size: 10px;
@@ -350,14 +339,12 @@ h1 span {
 
 .slabel:first-child { margin-top: 0; }
 
-/* ── divider ── */
 hr {
   border: none;
   border-top: 1px solid var(--border);
   margin: 1rem 0;
 }
 
-/* ── quick pick bar ── */
 .quickpick {
   background: var(--surface);
   border: 1px solid var(--border);
@@ -410,7 +397,6 @@ hr {
 .qp-need { font-size: 12px; color: var(--muted); flex: 1; }
 .qp-class { font-family: var(--mono); font-size: 12px; color: var(--accent); font-weight: 700; }
 
-/* ── search ── */
 .search-wrap {
   position: relative;
   margin-bottom: 1.5rem;
@@ -467,17 +453,14 @@ hr {
 .sr-match { font-size: 12px; color: var(--muted); margin-top: 2px; }
 .sr-match mark { background: rgba(124,106,247,0.25); color: var(--accent); border-radius: 2px; }
 
-/* ── animations ── */
 @keyframes fadeUp {
   to { opacity: 1; transform: translateY(0); }
 }
 
-/* ── scrollbar ── */
 ::-webkit-scrollbar { width: 6px; height: 6px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: var(--border-hover); border-radius: 3px; }
 
-/* ── syntax highlight helpers ── */
 .kw  { color: #b989f5; }
 .tp  { color: #3ecfb2; }
 .cm  { color: #4a4a6a; font-style: italic; }
@@ -493,30 +476,25 @@ hr {
     <p class="header-sub">Every data structure you need for DSA and interviews — when to use it, how to init it, every key operation.</p>
   </header>
 
-  <!-- search -->
   <div class="search-wrap">
     <span class="search-icon">⌕</span>
     <input class="search-input" id="searchInput" type="text" placeholder="search methods, use cases... e.g. 'floor', 'frequency count'" autocomplete="off" spellcheck="false">
     <div class="search-results" id="searchResults"></div>
   </div>
 
-  <!-- quick pick -->
   <div class="quickpick">
     <div class="quickpick-title">// quick pick</div>
     <div class="qp-grid" id="qpGrid"></div>
   </div>
 
-  <!-- legend -->
   <div class="legend">
     <div class="legend-item"><div class="legend-dot dot-o1"></div>O(1) constant</div>
     <div class="legend-item"><div class="legend-dot dot-ologn"></div>O(log n) logarithmic</div>
     <div class="legend-item"><div class="legend-dot dot-on"></div>O(n) linear</div>
   </div>
 
-  <!-- tabs -->
   <div class="tabs" id="tabs"></div>
 
-  <!-- panels -->
   <div id="panels"></div>
 
 </div>
@@ -701,7 +679,6 @@ map.put(c, map.getOrDefault(c, 0) + 1);`
 
 const chipClass = { o1:"chip-o1", on:"chip-on", ologn:"chip-ologn" };
 
-// Build quick pick
 const qpGrid = document.getElementById("qpGrid");
 data.forEach(d => {
   const el = document.createElement("div");
@@ -711,7 +688,6 @@ data.forEach(d => {
   qpGrid.appendChild(el);
 });
 
-// Build tabs
 const tabsEl = document.getElementById("tabs");
 const panelsEl = document.getElementById("panels");
 
@@ -776,7 +752,6 @@ data.forEach((d, i) => {
   panelsEl.appendChild(panel);
 });
 
-// Copy button
 function copyCode(btn) {
   const text = btn.previousElementSibling.innerText;
   navigator.clipboard.writeText(text).then(() => {
@@ -786,7 +761,6 @@ function copyCode(btn) {
   });
 }
 
-// Search
 const searchInput = document.getElementById("searchInput");
 const searchResults = document.getElementById("searchResults");
 
@@ -826,5 +800,12 @@ document.addEventListener("click", e => {
   if (!e.target.closest(".search-wrap")) searchResults.classList.remove("visible");
 });
 </script>
+
+<!-- Vercel Analytics -->
+<script>
+  window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };
+</script>
+<script defer src="/_vercel/insights/script.js"></script>
+
 </body>
 </html>
